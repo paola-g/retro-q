@@ -2,7 +2,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, update, onValue, push, remove } 
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // 2. VITE CONFIG (Environment Variables)
