@@ -307,20 +307,56 @@ function qHTML(q, d) {
   const isPresenter = S.user === d.presenter;
   const intentTag = q.intent === 'meeting' ? '<span class="q-intent meeting">🎙 Explain in meeting</span>' : q.intent === 'written' ? '<span class="q-intent written">✏ Written answer</span>' : '';
   const ansBlock = (q.intent === 'written' && q.answer) ? `<div class="q-answer-block"><div class="q-answer-label">Answer</div><div class="q-answer-text">${h(q.answer)}</div></div>` : '';
+  const presenterControls = isPresenter ? `
+    <div class="q-presenter-controls" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
+      <div class="intent-group" style="display:flex; gap:8px; margin-bottom:8px;">
+        <button class="itag ${q.intent === 'written' ? 'sel-written' : ''}" 
+                onclick="window._setQIntent('${q.id}','${d.id}','written')" 
+                style="font-size:0.75rem; cursor:pointer;">✏ Written answer</button>
+        <button class="itag ${q.intent === 'meeting' ? 'sel-meeting' : ''}" 
+                onclick="window._setQIntent('${q.id}','${d.id}','meeting')" 
+                style="font-size:0.75rem; cursor:pointer;">🎙 Answer in meeting</button>
+      </div>
+      <div class="q-written-answer-box" style="display:${q.intent === 'written' ? 'flex' : 'none'}; flex-direction:column; gap:5px;">
+        <textarea id="qwat-${q.id}" placeholder="Write your answer here..." rows="2" style="width:100%;">${h(q.answer || '')}</textarea>
+        <button class="btn-save-q-ans" onclick="window._saveQAnswer('${q.id}','${d.id}')" style="align-self:flex-end;">Save Answer</button>
+      </div>
+    </div>` : '';
   
-  return `<div class="q-item">
-    <div class="vote-stack">
-      <button class="upvote-btn ${voted?'active':''}" onclick="window._vote('${q.id}','${d.id}')">▲</button>
-      <div class="vote-num">${q.votes}</div>
-    </div>
-    <div class="q-content">
-      <div class="q-meta"><span>${h(q.author)}</span></div>
-      <div class="q-text">${h(q.text)}</div>
-      ${intentTag}${ansBlock}
-      <div class="q-actions"><span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">Reply</span></div>
-      ${S.replyOpen === q.id ? `<div class="reply-form"><textarea id="rt-${q.id}" rows="1"></textarea><button onclick="window._postReply('${q.id}','${d.id}')">Post</button></div>` : ''}
-    </div>
-  </div>`;
+return `
+    <div class="q-item" style="border-bottom:1px solid #eee; padding:15px 0;">
+      <div style="display:flex; gap:15px;">
+        <div class="vote-stack" style="text-align:center;">
+          <button class="upvote-btn ${voted ? 'active' : ''}" onclick="window._vote('${q.id}','${d.id}')">▲</button>
+          <div class="vote-num">${q.votes}</div>
+        </div>
+        <div class="q-content" style="flex:1;">
+          <div class="q-meta" style="font-size:0.8rem; color:#666;">
+            <strong>${h(q.author)}</strong> ${q.author === S.user ? '<span class="q-you">you</span>' : ''}
+          </div>
+          <div class="q-text" style="margin:5px 0;">${h(q.text)}</div>
+          
+          ${intentTag}
+          ${presenterControls}
+          ${ansBlock}
+          
+          <div class="q-actions" style="margin-top:10px; display:flex; gap:15px; font-size:0.8rem;">
+            <span class="toggle-reply-link" style="color:var(--accent); cursor:pointer;" onclick="window._toggleReplyForm('${q.id}')">
+              ${q.replies && q.replies.length ? `${q.replies.length} Replies` : 'Reply'}
+            </span>
+            <span class="flag-discuss" style="color:#e67e22; cursor:pointer;" onclick="window._flagDiscuss('${q.id}','${d.id}')">
+              🙋 Discuss
+            </span>
+          </div>
+          
+          ${S.replyOpen === q.id ? `
+            <div class="reply-form" style="margin-top:10px;">
+              <textarea id="rt-${q.id}" placeholder="Write a reply..." rows="1" style="width:100%;"></textarea>
+              <button onclick="window._postReply('${q.id}','${d.id}')">Post</button>
+            </div>` : ''}
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderAdminTeam() {
