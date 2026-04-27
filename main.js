@@ -385,6 +385,17 @@ function qHTML(q, d) {
     answerSection = `<button class="it-btn" onclick="window._toggleEditAns('${q.id}')" style="margin-top:8px;">+ Add Official Answer</button>`;
   }
 
+  // 3. Generate the list of user replies
+  const repliesList = q.replies.length > 0 ? `
+    <div class="q-replies-list" style="margin-top:10px; padding-left:15px; border-left:2px solid #eee;">
+      ${q.replies.map(r => `
+        <div class="reply-item" style="margin-bottom:8px; font-size:0.9rem;">
+          <strong style="color:var(--primary);">${h(r.author)}:</strong> 
+          <span style="color:#444;">${h(r.text)}</span>
+        </div>
+      `).join('')}
+    </div>` : '';
+
   // 2. MAIN CARD RETURN
   return `<div class="q-item">
     <div class="vote-stack">
@@ -394,7 +405,7 @@ function qHTML(q, d) {
     <div class="q-content">
       <div class="q-meta"><span>${h(q.author)}</span></div>
       <div class="q-text">${h(q.text)}</div>
-      ${intentTag}${answerSection}
+      ${intentTag}${answerSection}${repliesList}
       
       <div class="q-actions">
         <span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">
