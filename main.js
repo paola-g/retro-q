@@ -124,6 +124,10 @@ window._saveQAnswer = async function(qid, did) {
 };
 
 window._toggleReplyForm = function(qid) {
+  if (S.replyOpen !== qid) {
+    const existingTa = document.getElementById(`rt-${qid}`);
+    if (existingTa) existingTa.value = '';
+  }
   S.replyOpen = S.replyOpen === qid ? null : qid;
   renderDemos();
 };
