@@ -355,12 +355,44 @@ main { max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
 }
 .btn-discuss:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
 .btn-discuss.flagged { border-color: var(--purple); color: var(--purple); background: var(--purple-light); cursor: default; }
-.discuss-flag {
-  display: inline-flex; align-items: center; gap: 5px; margin-top: 0;
-  font-family: 'Inconsolata', monospace; font-size: .7rem; padding: 2px 9px;
-  border-radius: 4px; font-weight: 500;
-  background: var(--purple-light); color: var(--purple); border: 1px solid rgba(91,79,207,.2);
+	
+.flag-discuss {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Inconsolata', monospace; 
+  font-size: .7rem; 
+  padding: 2px 9px;
+  border-radius: 4px; 
+  font-weight: 500;
+  background: var(--purple-light); 
+  color: var(--purple); 
+  border: 1px solid rgba(91,79,207,.2);
+  cursor: pointer;
 }
+
+.flag-discuss:hover {
+  background: var(--purple);
+  color: white;
+}
+
+.it-btn {
+  padding: 4px 10px;
+  font-family: 'Inconsolata', monospace;
+  font-size: .7rem;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--muted);
+}
+
+.it-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+	
 .discuss-flaggers { font-family: 'Inconsolata', monospace; font-size: .68rem; color: var(--purple); margin-top: 3px; }
 
 .empty-q { text-align: center; padding: 24px 0 8px; font-style: italic; color: var(--muted); font-size: .88rem; }
