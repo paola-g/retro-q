@@ -28,6 +28,7 @@ const S = {
   demos: [],
   openDemo: null,
   replyOpen: null,
+  editingAns: null,
   _picked: null
 };
 
@@ -121,6 +122,13 @@ window._setQIntent = async function(qid, did, type) {
 window._saveQAnswer = async function(qid, did) {
   const answer = document.getElementById(`qwat-${qid}`)?.value || '';
   await update(ref(db, `demos/${did}/questions/${qid}`), { answer });
+  S.editingAns = null; // Close the editor
+  renderDemos();
+};
+
+window._toggleEditAns = function(qid) {
+  S.editingAns = S.editingAns === qid ? null : qid;
+  renderDemos();
 };
 
 window._toggleReplyForm = function(qid) {
@@ -321,22 +329,44 @@ function qHTML(q, d) {
   const voted = (q.voters && q.voters[voterKey]) === true;
   const isPresenter = S.user === d.presenter;
   
+// 1. Determine Intent Tag
   const intentTag = q.intent === 'meeting' ? '<span class="q-intent meeting">🎙 Explain in meeting</span>' : q.intent === 'written' ? '<span class="q-intent written">✏ Written answer</span>' : '';
-  const ansBlock = (q.intent === 'written' && q.answer) ? `<div class="q-answer-block"><div class="q-answer-label">Answer</div><div class="q-answer-text">${h(q.answer)}</div></div>` : '';
+
+  // 2. Logic for Answer vs Editor
+  let answerSection = '';
   
-  // 1. PRESENTER TOOLS (Use the classes from your CSS)
-  const presenterTools = isPresenter ? `
-    <div class="q-presenter-controls">
-       <div class="intent-group">
-         <button class="itag ${q.intent === 'written' ? 'sel-written' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','written')">✏ Written</button>
-         <button class="itag ${q.intent === 'meeting' ? 'sel-meeting' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','meeting')">🎙 Meeting</button>
-       </div>
-       ${q.intent === 'written' ? `
-         <div class="q-written-answer-box">
-           <textarea id="qwat-${q.id}" placeholder="Type your answer...">${h(q.answer || '')}</textarea>
-           <button class="btn-save-q-ans" onclick="window._saveQAnswer('${q.id}','${d.id}')">Save</button>
-         </div>` : ''}
-    </div>` : '';
+  if (isPresenter && S.editingAns === q.id) {
+    // EDITOR MODE (Presenter clicked Update/Edit)
+    answerSection = `
+      <div class="q-presenter-controls">
+        <div class="intent-group">
+          <button class="itag ${q.intent === 'written' ? 'sel-written' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','written')">✏ Written</button>
+          <button class="itag ${q.intent === 'meeting' ? 'sel-meeting' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','meeting')">🎙 Meeting</button>
+        </div>
+        <div class="q-written-answer-box">
+          <textarea id="qwat-${q.id}" placeholder="Type your official answer...">${h(q.answer || '')}</textarea>
+          <div style="display:flex; gap:10px; margin-top:5px;">
+            <button class="btn-save-q-ans" onclick="window._saveQAnswer('${q.id}','${d.id}')">Save</button>
+            <button class="it-btn" onclick="window._toggleEditAns(null)" style="background:#eee; color:#666;">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+  } else if (q.answer || q.intent) {
+    // VIEW MODE (Static Answer)
+    const displayAns = q.answer ? `<div class="q-answer-text">${h(q.answer)}</div>` : `<div class="q-answer-text" style="font-style:italic; color:var(--muted);">No written answer yet.</div>`;
+    
+    answerSection = `
+      <div class="q-answer-block">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="q-answer-label">Answer</div>
+          ${isPresenter ? `<button class="edit-link-btn" onclick="window._toggleEditAns('${q.id}')" style="background:none; border:none; color:var(--link); cursor:pointer; font-size:0.75rem;">✎ Update</button>` : ''}
+        </div>
+        ${displayAns}
+      </div>`;
+  } else if (isPresenter) {
+    // INITIAL STATE (No answer yet, show "Add Answer" button)
+    answerSection = `<button class="it-btn" onclick="window._toggleEditAns('${q.id}')" style="margin-top:8px;">+ Add Official Answer</button>`;
+  }
 
   // 2. MAIN CARD RETURN
   return `<div class="q-item">
@@ -347,7 +377,7 @@ function qHTML(q, d) {
     <div class="q-content">
       <div class="q-meta"><span>${h(q.author)}</span></div>
       <div class="q-text">${h(q.text)}</div>
-      ${intentTag}${ansBlock}${presenterTools}
+      ${intentTag}${answerSection}
       
       <div class="q-actions">
         <span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">
