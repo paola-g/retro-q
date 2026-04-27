@@ -63,13 +63,12 @@ _Presenter: ${t.presenter}_
 
       ${s.replyOpen===e.id?`
               <div class="reply-form">
-                <textarea 
-                  id="rt-${e.id}" 
-                  key="${Date.now()}" 
-                  placeholder="Type your reply..." 
+                <textarea  
+                  id="rt-${e.id}"  
+                  key="${Date.now()}"  
+                  placeholder="Type your reply..."  
                   rows="1"
                 ></textarea>
                 <button class="btn-reply" onclick="window._postReply('${e.id}','${t.id}')">Post</button>
               </div>`:""}
-          </div>
-        </div>`}function q(){const e=document.getElementById("admin-member-list");e&&(e.innerHTML=s.team.map(t=>`<div class="member-row"><span>${c(t)}</span><button onclick="window._removeMember('${b(t)}')">✕</button></div>`).join(""))}function P(){const e=document.getElementById("admin-demo-list");e&&(e.innerHTML=s.demos.map(t=>`<div class="demo-admin-row"><span>${c(t.topic)}</span><button onclick="window._removeDemo('${t.id}')">✕</button></div>`).join(""))}function F(){const e=s.demos.reduce((t,n)=>t+n.questions.length,0);document.getElementById("stat-demos")&&(document.getElementById("stat-demos").textContent=s.demos.length),document.getElementById("stat-qs")&&(document.getElementById("stat-qs").textContent=e)}let u=null;function _(){const e=document.getElementById("demo-presenter-grid");e&&(e.innerHTML=s.team.map(t=>`<div class="member-tile${u===t?" selected":""}" onclick="window._pickPresenter(this,'${b(t)}')">${c(t)}</div>`).join(""))}D($,e=>{e?(document.getElementById("login-screen").style.display="none",document.getElementById("overlay").style.display="flex",j()):(document.getElementById("login-screen").style.display="flex",document.getElementById("overlay").style.display="none")});
+    </div> </div>`}function q(){const e=document.getElementById("admin-member-list");e&&(e.innerHTML=s.team.map(t=>`<div class="member-row"><span>${c(t)}</span><button onclick="window._removeMember('${b(t)}')">✕</button></div>`).join(""))}function P(){const e=document.getElementById("admin-demo-list");e&&(e.innerHTML=s.demos.map(t=>`<div class="demo-admin-row"><span>${c(t.topic)}</span><button onclick="window._removeDemo('${t.id}')">✕</button></div>`).join(""))}function F(){const e=s.demos.reduce((t,n)=>t+n.questions.length,0);document.getElementById("stat-demos")&&(document.getElementById("stat-demos").textContent=s.demos.length),document.getElementById("stat-qs")&&(document.getElementById("stat-qs").textContent=e)}let u=null;function _(){const e=document.getElementById("demo-presenter-grid");e&&(e.innerHTML=s.team.map(t=>`<div class="member-tile${u===t?" selected":""}" onclick="window._pickPresenter(this,'${b(t)}')">${c(t)}</div>`).join(""))}D($,e=>{e?(document.getElementById("login-screen").style.display="none",document.getElementById("overlay").style.display="flex",j()):(document.getElementById("login-screen").style.display="flex",document.getElementById("overlay").style.display="none")});
