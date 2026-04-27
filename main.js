@@ -133,6 +133,7 @@ window._postReply = async function(qid, did) {
   const text = ta?.value.trim(); if (!text) { ta?.focus(); return; }
   const rRef = push(ref(db, `demos/${did}/questions/${qid}/replies`));
   await set(rRef, { author: S.user, text });
+  if (ta) ta.value = '';
   S.replyOpen = null;
 };
 
