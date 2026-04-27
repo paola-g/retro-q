@@ -135,6 +135,7 @@ window._postReply = async function(qid, did) {
   await set(rRef, { author: S.user, text });
   if (ta) ta.value = '';
   S.replyOpen = null;
+  renderDemos();
 };
 
 window._flagDiscuss = async function(qid, did) {
@@ -310,18 +311,21 @@ function qHTML(q, d) {
   const intentTag = q.intent === 'meeting' ? '<span class="q-intent meeting">🎙 Explain in meeting</span>' : q.intent === 'written' ? '<span class="q-intent written">✏ Written answer</span>' : '';
   const ansBlock = (q.intent === 'written' && q.answer) ? `<div class="q-answer-block"><div class="q-answer-label">Answer</div><div class="q-answer-text">${h(q.answer)}</div></div>` : '';
   
-  // Controls only visible to the person presenting
+  // 1. PRESENTER TOOLS (Use the classes from your CSS)
   const presenterTools = isPresenter ? `
-    <div class="p-tools" style="margin-top:8px; border-top:1px dashed #ccc; padding-top:8px;">
-       <button class="it-btn" onclick="window._setQIntent('${q.id}','${d.id}','written')">✏ Written</button>
-       <button class="it-btn" onclick="window._setQIntent('${q.id}','${d.id}','meeting')">🎙 Meeting</button>
+    <div class="q-presenter-controls">
+       <div class="intent-group">
+         <button class="itag ${q.intent === 'written' ? 'sel-written' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','written')">✏ Written</button>
+         <button class="itag ${q.intent === 'meeting' ? 'sel-meeting' : ''}" onclick="window._setQIntent('${q.id}','${d.id}','meeting')">🎙 Meeting</button>
+       </div>
        ${q.intent === 'written' ? `
-         <div style="display:flex; margin-top:5px; gap:5px;">
-           <input id="qwat-${q.id}" value="${h(q.answer)}" style="flex:1" placeholder="Type answer...">
-           <button onclick="window._saveQAnswer('${q.id}','${d.id}')">Save</button>
+         <div class="q-written-answer-box">
+           <textarea id="qwat-${q.id}" placeholder="Type your answer...">${h(q.answer || '')}</textarea>
+           <button class="btn-save-q-ans" onclick="window._saveQAnswer('${q.id}','${d.id}')">Save</button>
          </div>` : ''}
     </div>` : '';
 
+  // 2. MAIN CARD RETURN
   return `<div class="q-item">
     <div class="vote-stack">
       <button class="upvote-btn ${voted?'active':''}" onclick="window._vote('${q.id}','${d.id}')">▲</button>
@@ -331,15 +335,21 @@ function qHTML(q, d) {
       <div class="q-meta"><span>${h(q.author)}</span></div>
       <div class="q-text">${h(q.text)}</div>
       ${intentTag}${ansBlock}${presenterTools}
+      
       <div class="q-actions">
         <span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">
-          ${q.replies.length ? `${q.replies.length} Replies` : 'Reply'}
+          ${q.replies.length > 0 ? `${q.replies.length} ${q.replies.length === 1 ? 'Reply' : 'Replies'}` : 'Reply'}
         </span>
-        <span class="flag-discuss" onclick="window._flagDiscuss('${q.id}','${d.id}')" style="cursor:pointer; margin-left:10px;">
+        <span class="btn-discuss ${q.discussFlaggers.length > 0 ? 'flagged' : ''}" onclick="window._flagDiscuss('${q.id}','${d.id}')">
           🙋 Discuss (${q.discussFlaggers.length})
         </span>
       </div>
-      ${S.replyOpen === q.id ? `<div class="reply-form"><textarea id="rt-${q.id}" rows="1"></textarea><button onclick="window._postReply('${q.id}','${d.id}')">Post</button></div>` : ''}
+
+      ${S.replyOpen === q.id ? `
+        <div class="reply-form">
+          <textarea id="rt-${q.id}" placeholder="Write a reply..." rows="1"></textarea>
+          <button class="btn-reply" onclick="window._postReply('${q.id}','${d.id}')">Post</button>
+        </div>` : ''}
     </div>
   </div>`;
 }
