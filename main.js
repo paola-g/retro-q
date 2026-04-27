@@ -305,9 +305,22 @@ function qHTML(q, d) {
   const voterKey = btoa(S.user).replace(/=/g, '');
   const voted = q.voters[voterKey] === true;
   const isPresenter = S.user === d.presenter;
+  
   const intentTag = q.intent === 'meeting' ? '<span class="q-intent meeting">🎙 Explain in meeting</span>' : q.intent === 'written' ? '<span class="q-intent written">✏ Written answer</span>' : '';
   const ansBlock = (q.intent === 'written' && q.answer) ? `<div class="q-answer-block"><div class="q-answer-label">Answer</div><div class="q-answer-text">${h(q.answer)}</div></div>` : '';
   
+  // Controls only visible to the person presenting
+  const presenterTools = isPresenter ? `
+    <div class="p-tools" style="margin-top:8px; border-top:1px dashed #ccc; padding-top:8px;">
+       <button class="it-btn" onclick="window._setQIntent('${q.id}','${d.id}','written')">✏ Written</button>
+       <button class="it-btn" onclick="window._setQIntent('${q.id}','${d.id}','meeting')">🎙 Meeting</button>
+       ${q.intent === 'written' ? `
+         <div style="display:flex; margin-top:5px; gap:5px;">
+           <input id="qwat-${q.id}" value="${h(q.answer)}" style="flex:1" placeholder="Type answer...">
+           <button onclick="window._saveQAnswer('${q.id}','${d.id}')">Save</button>
+         </div>` : ''}
+    </div>` : '';
+
   return `<div class="q-item">
     <div class="vote-stack">
       <button class="upvote-btn ${voted?'active':''}" onclick="window._vote('${q.id}','${d.id}')">▲</button>
@@ -316,8 +329,15 @@ function qHTML(q, d) {
     <div class="q-content">
       <div class="q-meta"><span>${h(q.author)}</span></div>
       <div class="q-text">${h(q.text)}</div>
-      ${intentTag}${ansBlock}
-      <div class="q-actions"><span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">Reply</span></div>
+      ${intentTag}${ansBlock}${presenterTools}
+      <div class="q-actions">
+        <span class="toggle-reply-link" onclick="window._toggleReplyForm('${q.id}')">
+          ${q.replies.length ? `${q.replies.length} Replies` : 'Reply'}
+        </span>
+        <span class="flag-discuss" onclick="window._flagDiscuss('${q.id}','${d.id}')" style="cursor:pointer; margin-left:10px;">
+          🙋 Discuss (${q.discussFlaggers.length})
+        </span>
+      </div>
       ${S.replyOpen === q.id ? `<div class="reply-form"><textarea id="rt-${q.id}" rows="1"></textarea><button onclick="window._postReply('${q.id}','${d.id}')">Post</button></div>` : ''}
     </div>
   </div>`;
