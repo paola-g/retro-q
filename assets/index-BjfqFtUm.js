@@ -1,0 +1,75 @@
+import{initializeApp as x}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";import{getDatabase as k,push as g,ref as a,set as p,get as f,update as y,remove as h,onValue as w}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";import{getAuth as L,signInWithEmailAndPassword as A,signOut as O,onAuthStateChanged as D}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";(function(){const t=document.createElement("link").relList;if(t&&t.supports&&t.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))i(o);new MutationObserver(o=>{for(const r of o)if(r.type==="childList")for(const d of r.addedNodes)d.tagName==="LINK"&&d.rel==="modulepreload"&&i(d)}).observe(document,{childList:!0,subtree:!0});function n(o){const r={};return o.integrity&&(r.integrity=o.integrity),o.referrerPolicy&&(r.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?r.credentials="include":o.crossOrigin==="anonymous"?r.credentials="omit":r.credentials="same-origin",r}function i(o){if(o.ep)return;o.ep=!0;const r=n(o);fetch(o.href,r)}})();const M={apiKey:"AIzaSyBwVEea-5FQulW4JQZgJMMwIZiUVXjopMY",authDomain:"retro-q.firebaseapp.com",databaseURL:"https://retro-q-default-rtdb.europe-west1.firebasedatabase.app",projectId:"retro-q",storageBucket:"retro-q.firebasestorage.app",messagingSenderId:"1035131215370",appId:"1:1035131215370:web:1c01668eabde570f8b49f3"},E=x(M),l=k(E),$=L(E),s={user:"",isAdmin:!1,sprint:"Sprint 1",team:[],demos:[],openDemo:null,replyOpen:null,_picked:null};function c(e){return String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}function b(e){return e.replace(/\\/g,"\\\\").replace(/'/g,"\\'")}function I(e,t,n){const i=document.createElement("a");i.href=URL.createObjectURL(new Blob([t],{type:n})),i.download=e,i.click()}window._signIn=async function(){const e=document.getElementById("auth-email").value.trim(),t=document.getElementById("auth-password").value,n=document.getElementById("auth-error");n.style.display="none";try{await A($,e,t)}catch{n.textContent="Incorrect email or password.",n.style.display="block"}};window._signOut=async function(){await O($)};window._selectMember=function(e,t){s._picked=t,document.querySelectorAll("#team-grid .member-tile").forEach(n=>n.classList.remove("selected")),e.classList.add("selected"),document.getElementById("btn-enter").disabled=!1};window.enterApp=()=>{s._picked&&(s.user=s._picked,s.isAdmin=!1,B())};window.enterAdmin=()=>{s.user="Admin",s.isAdmin=!0,B()};window.switchUser=()=>{s.user="",s.isAdmin=!1,s._picked=null,document.querySelectorAll("#team-grid .member-tile").forEach(e=>e.classList.remove("selected")),document.getElementById("btn-enter").disabled=!0,document.getElementById("btn-switch-user").style.display="none",document.getElementById("tab-admin").style.display="none",document.getElementById("overlay").style.display="flex"};window.switchTab=e=>{document.getElementById("tab-qa").classList.toggle("active",e==="qa"),document.getElementById("tab-admin").classList.toggle("active",e==="admin"),document.getElementById("view-qa").classList.toggle("hidden",e!=="qa"),document.getElementById("view-admin").classList.toggle("hidden",e!=="admin")};window._toggleDemo=function(e){s.openDemo=s.openDemo===e?null:e,v()};window._postQ=async function(e){const t=document.getElementById(`qt-${e}`),n=t==null?void 0:t.value.trim();if(!n){t==null||t.focus();return}const i=g(a(l,`demos/${e}/questions`));await p(i,{author:s.user,text:n,votes:0,intent:null,answer:""}),t.value=""};window._vote=async function(e,t){const n=btoa(s.user).replace(/=/g,""),i=`demos/${t}/questions/${e}`,o=a(l,`${i}/voters/${n}`);if((await f(o)).exists())return;const m=(await f(a(l,`${i}/votes`))).val()||0;await y(a(l,i),{votes:m+1,[`voters/${n}`]:!0})};window._setQIntent=async function(e,t,n){await y(a(l,`demos/${t}/questions/${e}`),{intent:n})};window._saveQAnswer=async function(e,t){var i;const n=((i=document.getElementById(`qwat-${e}`))==null?void 0:i.value)||"";await y(a(l,`demos/${t}/questions/${e}`),{answer:n})};window._toggleReplyForm=function(e){if(s.replyOpen!==e){const t=document.getElementById(`rt-${e}`);t&&(t.value="")}s.replyOpen=s.replyOpen===e?null:e,v()};window._postReply=async function(e,t){const n=document.getElementById(`rt-${e}`),i=n==null?void 0:n.value.trim();if(!i){n==null||n.focus();return}const o=g(a(l,`demos/${t}/questions/${e}/replies`));await p(o,{author:s.user,text:i,timestamp:Date.now()}),n&&(n.value=""),s.replyOpen=null,v()};window._flagDiscuss=async function(e,t){const n=g(a(l,`demos/${t}/questions/${e}/discussFlaggers`));await p(n,s.user)};window.saveConfig=async function(){const e=document.getElementById("cfg-sprint").value.trim();e&&await p(a(l,"sprint"),e)};window.addMember=async function(){const e=document.getElementById("new-member"),t=e.value.trim();if(!t||s.team.includes(t))return;const n=g(a(l,"team"));await p(n,t),e.value=""};window._removeMember=async function(e){const t=await f(a(l,"team"));if(!t.val())return;const n=Object.entries(t.val()).find(([,i])=>i===e);n&&await h(a(l,`team/${n[0]}`)),u===e&&(u=null)};window.addDemo=async function(){const e=u,t=document.getElementById("new-demo-t").value.trim();if(!e||!t)return;const n=g(a(l,"demos"));await p(n,{presenter:e,topic:t}),u=null,document.getElementById("new-demo-t").value="",_()};window._removeDemo=async function(e){await h(a(l,`demos/${e}`)),s.openDemo===e&&(s.openDemo=null)};window._pickPresenter=function(e,t){u=t,document.querySelectorAll("#demo-presenter-grid .member-tile").forEach(n=>n.classList.remove("selected")),e.classList.add("selected")};window.exportMarkdown=function(){let e=`# ${s.sprint} — Retrospective Q&A
+
+`;s.demos.forEach(t=>{e+=`## ${t.topic}
+_Presenter: ${t.presenter}_
+
+`;const n=[...t.questions].sort((i,o)=>o.votes-i.votes);if(!n.length){e+=`_No questions._
+
+`;return}n.forEach(i=>{e+=`**Q (${i.author}, ${i.votes}▲):** ${i.text}
+`,i.intent&&(e+=`_Response: ${i.intent==="meeting"?"🎙 Explain in meeting":"✏ Written"}_
+`),i.answer&&(e+=`**A (${t.presenter}):** ${i.answer}
+`),(i.discussFlaggers||[]).length&&(e+=`_🙋 Discuss in meeting: ${i.discussFlaggers.join(", ")}_
+`),(i.replies||[]).forEach(o=>{e+=`  ↳ **${o.author}:** ${o.text}
+`}),e+=`
+`})}),I(`${s.sprint.replace(/\s+/g,"-")}-retro.md`,e,"text/markdown")};window.exportJSON=function(){I(`${s.sprint.replace(/\s+/g,"-")}-retro.json`,JSON.stringify({sprint:s.sprint,demos:s.demos},null,2),"application/json")};function j(){w(a(l,"sprint"),e=>{s.sprint=e.val()||"Sprint 1",document.getElementById("h-sprint").textContent=s.sprint;const t=document.getElementById("cfg-sprint");t&&document.activeElement!==t&&(t.value=s.sprint)}),w(a(l,"team"),e=>{s.team=e.val()?Object.values(e.val()):[],S(),_(),q()}),w(a(l,"demos"),e=>{const t=e.val()||{};s.demos=Object.entries(t).map(([n,i])=>({id:n,presenter:i.presenter||"",topic:i.topic||"",questions:i.questions?Object.entries(i.questions).map(([o,r])=>({id:o,author:r.author||"",text:r.text||"",votes:r.votes||0,intent:r.intent||null,answer:r.answer||"",discussFlaggers:r.discussFlaggers?Object.values(r.discussFlaggers):[],replies:r.replies?Object.entries(r.replies).map(([d,m])=>({id:d,author:m.author||"",text:m.text||""})):[],voters:r.voters||{}})):[]})),v(),P(),F()})}function S(){const e=document.getElementById("team-grid");if(e){if(!s.team.length){e.innerHTML='<div style="color:var(--muted);font-style:italic;font-size:.85rem;grid-column:1/-1">No members.</div>';return}e.innerHTML=s.team.map(t=>`
+    <div class="member-tile${s._picked===t?" selected":""}" onclick="window._selectMember(this,'${b(t)}')">
+      <div class="avt-sm">${t[0]}</div>${c(t)}
+    </div>`).join("")}}function B(){document.getElementById("overlay").style.display="none",document.getElementById("h-user").textContent=s.user,document.getElementById("h-sprint").textContent=s.sprint,document.getElementById("btn-switch-user").style.display="inline-block",s.isAdmin?document.getElementById("tab-admin").style.display="":document.getElementById("tab-admin").style.display="none",window.switchTab(s.isAdmin?"admin":"qa")}function v(){const e=document.getElementById("demos-list");if(!s.demos.length){e.innerHTML='<div style="text-align:center;padding:60px 0;font-style:italic;color:var(--muted)">No demos.</div>';return}e.innerHTML=s.demos.map((t,n)=>{const i=s.openDemo===t.id,o=t.questions.length,r=t.questions.reduce((d,m)=>d+m.votes,0);return`<div class="demo-card ${i?"open":""}" id="dc-${t.id}">
+      <div class="demo-head" onclick="window._toggleDemo('${t.id}')">
+        <div class="demo-num">0${n+1}</div>
+        <div class="demo-info">
+          <h3>${c(t.topic)}</h3>
+          <div class="by">${c(t.presenter)}${s.user===t.presenter?'<span class="q-you">you</span>':""}</div>
+        </div>
+        <div class="demo-badges">${o?`<span class="badge has-q">${o}q · ${r}▲</span>`:'<span class="badge">no questions</span>'}</div>
+        <div class="demo-chevron">▶</div>
+      </div>
+      <div class="q-panel" id="qp-${t.id}">
+        <div class="submit-box">
+          <textarea id="qt-${t.id}" placeholder="Ask a question..." rows="2"></textarea>
+          <div class="submit-footer"><button class="btn-post" onclick="window._postQ('${t.id}')">Post question →</button></div>
+        </div>
+        ${R(t)}
+      </div>
+    </div>`}).join("")}function R(e){const t=[...e.questions].sort((n,i)=>i.votes-n.votes);return t.length?`<div class="q-list">${t.map(n=>T(n,e)).join("")}</div>`:'<div class="empty-q">No questions yet.</div>'}function T(e,t){const n=btoa(s.user).replace(/=/g,""),i=(e.voters&&e.voters[n])===!0,o=s.user===t.presenter,r=e.intent==="meeting"?'<span class="q-intent meeting">🎙 Explain in meeting</span>':e.intent==="written"?'<span class="q-intent written">✏ Written answer</span>':"",d=e.intent==="written"&&e.answer?`<div class="q-answer-block"><div class="q-answer-label">Answer</div><div class="q-answer-text">${c(e.answer)}</div></div>`:"",m=o?`
+    <div class="q-presenter-controls">
+       <div class="intent-group">
+         <button class="itag ${e.intent==="written"?"sel-written":""}" onclick="window._setQIntent('${e.id}','${t.id}','written')">✏ Written</button>
+         <button class="itag ${e.intent==="meeting"?"sel-meeting":""}" onclick="window._setQIntent('${e.id}','${t.id}','meeting')">🎙 Meeting</button>
+       </div>
+       ${e.intent==="written"?`
+         <div class="q-written-answer-box">
+           <textarea id="qwat-${e.id}" placeholder="Type your answer...">${c(e.answer||"")}</textarea>
+           <button class="btn-save-q-ans" onclick="window._saveQAnswer('${e.id}','${t.id}')">Save</button>
+         </div>`:""}
+    </div>`:"";return`<div class="q-item">
+    <div class="vote-stack">
+      <button class="upvote-btn ${i?"active":""}" onclick="window._vote('${e.id}','${t.id}')">▲</button>
+      <div class="vote-num">${e.votes}</div>
+    </div>
+    <div class="q-content">
+      <div class="q-meta"><span>${c(e.author)}</span></div>
+      <div class="q-text">${c(e.text)}</div>
+      ${r}${d}${m}
+      
+      <div class="q-actions">
+        <span class="toggle-reply-link" onclick="window._toggleReplyForm('${e.id}')">
+          ${e.replies.length>0?`${e.replies.length} ${e.replies.length===1?"Reply":"Replies"}`:"Reply"}
+        </span>
+        <span class="btn-discuss ${e.discussFlaggers.length>0?"flagged":""}" onclick="window._flagDiscuss('${e.id}','${t.id}')">
+          🙋 Discuss (${e.discussFlaggers.length})
+        </span>
+      </div>
+
+      ${s.replyOpen===e.id?`
+              <div class="reply-form">
+                <textarea 
+                  id="rt-${e.id}" 
+                  key="${Date.now()}" 
+                  placeholder="Type your reply..." 
+                  rows="1"
+                ></textarea>
+                <button class="btn-reply" onclick="window._postReply('${e.id}','${t.id}')">Post</button>
+              </div>`:""}
+          </div>
+        </div>`}function q(){const e=document.getElementById("admin-member-list");e&&(e.innerHTML=s.team.map(t=>`<div class="member-row"><span>${c(t)}</span><button onclick="window._removeMember('${b(t)}')">✕</button></div>`).join(""))}function P(){const e=document.getElementById("admin-demo-list");e&&(e.innerHTML=s.demos.map(t=>`<div class="demo-admin-row"><span>${c(t.topic)}</span><button onclick="window._removeDemo('${t.id}')">✕</button></div>`).join(""))}function F(){const e=s.demos.reduce((t,n)=>t+n.questions.length,0);document.getElementById("stat-demos")&&(document.getElementById("stat-demos").textContent=s.demos.length),document.getElementById("stat-qs")&&(document.getElementById("stat-qs").textContent=e)}let u=null;function _(){const e=document.getElementById("demo-presenter-grid");e&&(e.innerHTML=s.team.map(t=>`<div class="member-tile${u===t?" selected":""}" onclick="window._pickPresenter(this,'${b(t)}')">${c(t)}</div>`).join(""))}D($,e=>{e?(document.getElementById("login-screen").style.display="none",document.getElementById("overlay").style.display="flex",j()):(document.getElementById("login-screen").style.display="flex",document.getElementById("overlay").style.display="none")});
