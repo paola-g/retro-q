@@ -303,7 +303,7 @@ function questionsHTML(d) {
 
 function qHTML(q, d) {
   const voterKey = btoa(S.user).replace(/=/g, '');
-  const voted = q.voters[voterKey] === true;
+  const voted = (q.voters && q.voters[voterKey]) === true;
   const isPresenter = S.user === d.presenter;
   
   const intentTag = q.intent === 'meeting' ? '<span class="q-intent meeting">🎙 Explain in meeting</span>' : q.intent === 'written' ? '<span class="q-intent written">✏ Written answer</span>' : '';
