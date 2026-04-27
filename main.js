@@ -289,10 +289,20 @@ function boot() {
 
 function renderDemos() {
   const el = document.getElementById('demos-list');
+  
+  // --- PRESERVE ---
+  // Store what the user is currently typing in ANY textarea
+  const savedText = {};
+  document.querySelectorAll('textarea[id]').forEach(ta => {
+    if (ta.value) savedText[ta.id] = ta.value;
+  });
+
   if (!S.demos.length) {
     el.innerHTML = '<div style="text-align:center;padding:60px 0;font-style:italic;color:var(--muted)">No demos.</div>';
     return;
   }
+
+  // --- RE-RENDER ---
   el.innerHTML = S.demos.map((d,i) => {
     const open = S.openDemo === d.id;
     const qc = d.questions.length;
@@ -302,7 +312,7 @@ function renderDemos() {
         <div class="demo-num">0${i+1}</div>
         <div class="demo-info">
           <h3>${h(d.topic)}</h3>
-          <div class="by">${h(d.presenter)}${S.user === d.presenter?'<span class="q-you">you</span>':''}</div>
+          <div class="by">${h(d.presenter)}${S.user === d.presenter?' <span class="q-you">you</span>':''}</div>
         </div>
         <div class="demo-badges">${qc?`<span class="badge has-q">${qc}q · ${vc}▲</span>`:'<span class="badge">no questions</span>'}</div>
         <div class="demo-chevron">▶</div>
@@ -316,6 +326,13 @@ function renderDemos() {
       </div>
     </div>`;
   }).join('');
+
+  // --- RESTORE ---
+  // Put the text back into the textareas after they've been recreated
+  Object.keys(savedText).forEach(id => {
+    const ta = document.getElementById(id);
+    if (ta) ta.value = savedText[id];
+  });
 }
 
 function questionsHTML(d) {
@@ -392,7 +409,7 @@ function qHTML(q, d) {
               <div class="reply-form">
                 <textarea  
                   id="rt-${q.id}"  
-                  key="${Date.now()}"  
+                  key="reply-${q.id}"  
                   placeholder="Type your reply..."  
                   rows="1"
                 ></textarea>
