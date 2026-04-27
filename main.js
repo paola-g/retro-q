@@ -442,9 +442,24 @@ function renderAdminDemos() {
 }
 
 function renderStats() {
-  const tQ = S.demos.reduce((s,d)=>s+d.questions.length,0);
-  if(document.getElementById('stat-demos')) document.getElementById('stat-demos').textContent = S.demos.length;
-  if(document.getElementById('stat-qs')) document.getElementById('stat-qs').textContent = tQ;
+  // 1. Calculate Total Questions
+  const totalQs = S.demos.reduce((sum, d) => sum + d.questions.length, 0);
+  
+  // 2. Calculate Total Votes 
+  // We loop through demos, then loop through each question's votes
+  const totalVotes = S.demos.reduce((sum, d) => {
+    const demoVotes = d.questions.reduce((qSum, q) => qSum + (q.votes || 0), 0);
+    return sum + demoVotes;
+  }, 0);
+
+  // 3. Update the UI (Ensure these IDs match your index.html)
+  const elDemos = document.getElementById('stat-demos');
+  const elQs = document.getElementById('stat-qs');
+  const elVotes = document.getElementById('stat-votes'); // Add this one if you have it!
+
+  if (elDemos) elDemos.textContent = S.demos.length;
+  if (elQs) elQs.textContent = totalQs;
+  if (elVotes) elVotes.textContent = totalVotes;
 }
 
 let pickedPresenter = null;
