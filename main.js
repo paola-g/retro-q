@@ -360,16 +360,15 @@ function qHTML(q, d) {
 
       ${S.replyOpen === q.id ? `
               <div class="reply-form">
-                <textarea 
-                  id="rt-${q.id}" 
-                  key="${Date.now()}" 
-                  placeholder="Type your reply..." 
+                <textarea  
+                  id="rt-${q.id}"  
+                  key="${Date.now()}"  
+                  placeholder="Type your reply..."  
                   rows="1"
                 ></textarea>
                 <button class="btn-reply" onclick="window._postReply('${q.id}','${d.id}')">Post</button>
               </div>` : ''}
-          </div>
-        </div>`;
+    </div> </div>`;
 }
 
 function renderAdminTeam() {
