@@ -128,16 +128,25 @@ window._toggleReplyForm = function(qid) {
     const existingTa = document.getElementById(`rt-${qid}`);
     if (existingTa) existingTa.value = '';
   }
+  
   S.replyOpen = S.replyOpen === qid ? null : qid;
   renderDemos();
 };
 
 window._postReply = async function(qid, did) {
   const ta = document.getElementById(`rt-${qid}`);
-  const text = ta?.value.trim(); if (!text) { ta?.focus(); return; }
+  const text = ta?.value.trim(); 
+  if (!text) { ta?.focus(); return; }
+
   const rRef = push(ref(db, `demos/${did}/questions/${qid}/replies`));
-  await set(rRef, { author: S.user, text });
-  if (ta) ta.value = '';
+  await set(rRef, { 
+    author: S.user, 
+    text, 
+    timestamp: Date.now() // Recommended for sorting
+  });
+
+  if (ta) ta.value = ''; 
+  
   S.replyOpen = null;
   renderDemos();
 };
@@ -350,12 +359,17 @@ function qHTML(q, d) {
       </div>
 
       ${S.replyOpen === q.id ? `
-        <div class="reply-form">
-          <textarea id="rt-${q.id}" placeholder="Write a reply..." rows="1"></textarea>
-          <button class="btn-reply" onclick="window._postReply('${q.id}','${d.id}')">Post</button>
-        </div>` : ''}
-    </div>
-  </div>`;
+              <div class="reply-form">
+                <textarea 
+                  id="rt-${q.id}" 
+                  key="${Date.now()}" 
+                  placeholder="Type your reply..." 
+                  rows="1"
+                ></textarea>
+                <button class="btn-reply" onclick="window._postReply('${q.id}','${d.id}')">Post</button>
+              </div>` : ''}
+          </div>
+        </div>`;
 }
 
 function renderAdminTeam() {
